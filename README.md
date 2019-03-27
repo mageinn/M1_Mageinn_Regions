@@ -1,0 +1,1 @@
+# Regions for Magento® 1
