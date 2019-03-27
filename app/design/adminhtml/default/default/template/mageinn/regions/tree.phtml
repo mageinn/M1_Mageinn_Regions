@@ -1,0 +1,144 @@
+<?php
+/**
+ * Mageinn_Regions extension
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * @category    Mageinn
+ * @package     Mageinn_Regions
+ * @copyright   Copyright (c) 2014 Mageinn. (http://mageinn.com)
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+
+/**
+ * @category   Mageinn
+ * @package    Mageinn_Regions
+ * @author     Mageinn
+ */
+?>
+<div class="categories-side-col">
+    <div class="content-header">
+        <h3 class="icon-head head-categories"><?php echo Mage::helper('mageinn_regions')->__('Regions') ?></h3>
+        <?php echo $this->getAddGroupButtonHtml() ?><br />
+        <?php echo $this->getAddSubButtonHtml() ?>
+    </div>
+    <div class="tree-actions">
+        <a href="#" onclick="jQuery('#tree-div').jstree('close_all'); return false;"><?php echo $this->__('Collapse All'); ?></a> 
+        <span class="separator">|</span> 
+        <a href="#" onclick="jQuery('#tree-div').jstree('open_all'); return false;"><?php echo $this->__('Expand All'); ?></a>
+    </div>
+    <div class="tree-holder">
+        <div id="tree-div" style="width:100%; overflow:auto;"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var loadOnNextSelect = true;
+var form_key = "<?php echo $this->getFormKey(); ?>"; 
+var new_node = 0;
+jQuery(function($){
+    $("#tree-div").jstree({ 
+        "plugins" : [ 
+            "themes","json_data","ui","crrm","cookies","dnd","hotkeys","contextmenu" 
+        ],
+        "themes" : {
+            "theme" : "magento"
+        },
+        "json_data" : { 
+            "ajax" : {
+                "url" : "<?php echo $this->getLoadTreeUrl() ?>",
+                "data" : function (n) { 
+                    return { 
+                        "id" : n.attr ? n.attr("id").replace("node_","") : 0,
+                        "form_key" : "<?php echo $this->getFormKey(); ?>"
+                    }; 
+                },
+                "type" : "POST"
+            }
+        },
+        "cookies" : {
+            "save_selected" : false
+        },
+        "core" : { 
+            'animation' : false
+        }
+    })
+    .bind("select_node.jstree", function (e, data) {
+            var id = data.rslt.obj.attr("id");
+    
+            if(loadOnNextSelect) {
+                displayLoadingMask();
+
+                $.ajax({
+                    type: 'GET',
+                    url: "<?php echo $this->getEditUrl() ?>",
+                    data : { 
+                        "id" : id
+                    },
+                    dataType  : 'json',
+                    success : function (data) {
+                        updateContent(data);
+                        $('#loading-mask').hide();
+                    }
+                });
+            } else {
+                loadOnNextSelect = true;
+            }
+    })
+    .bind("reopen.jstree", function (e) {
+        if(new_node > 0) {
+            jQuery("#tree-div").jstree("deselect_all");
+            loadOnNextSelect = false;
+            jQuery("#tree-div").jstree("select_node","#" + new_node);
+            new_node = 0;
+        }
+    })
+    .bind("move_node.jstree", function (e, data) {
+        data.rslt.o.each(function (i) {
+            $.ajax({
+                async : false,
+                type: 'POST',
+                url: "<?php echo $this->getMoveUrl() ?>",
+                data : { 
+                    "id" : $(this).attr("id").replace("node_",""), 
+                    "ref" : data.rslt.cr === -1 ? 1 : data.rslt.np.attr("id").replace("node_",""), 
+                    "position" : data.rslt.cp + i,
+                    "form_key" : form_key
+                },
+                dataType  : 'json',
+                success : function (r) {
+                    if(!r.status) {
+                        $.jstree.rollback(data.rlbk);
+                    } else {
+                        $(data.rslt.oc).attr("id", "node_" + r.id);
+                        if(data.rslt.cy && $(data.rslt.oc).children("UL").length) {
+                            data.inst.refresh(data.inst._get_parent(data.rslt.oc));
+                        }
+                    }
+                }
+            });
+        });
+    });
+
+});
+
+function displayLoadingMask()
+{
+    var loaderArea = $$('#html-body .wrapper')[0]; // Blocks all page
+    Position.clone($(loaderArea), $('loading-mask'), {offsetLeft:-2});
+    toggleSelectsUnderBlock($('loading-mask'), false);
+    Element.show('loading-mask');
+}
+
+//]]>
+</script>

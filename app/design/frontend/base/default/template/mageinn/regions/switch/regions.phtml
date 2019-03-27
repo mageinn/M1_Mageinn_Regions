@@ -1,0 +1,65 @@
+<?php
+/**
+ * Mageinn_Regions extension
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * @category    Mageinn
+ * @package     Mageinn_Regions
+ * @copyright   Copyright (c) 2014 Mageinn. (http://mageinn.com)
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+
+/**
+ * @category   Mageinn
+ * @package    Mageinn_Regions
+ * @author     Mageinn
+ */
+?>
+<?php if($this->getCities()->count() > 1): ?>
+    <?php
+            $currRegionName = $this->getCurrentRegionName();
+            $html = '';
+            $total = 0;
+            foreach($this->getCities() as $_region)
+            {
+                $regionName = $this->__($this->htmlEscape($_region->getName()));
+                $regionId = $_region->getId();
+                $urlKey = $_region->getUrlKey();
+                $css = '';
+                
+                if($total < 2)
+                    $css = 'style="font-weight: bold;"';
+
+                if($regionId == $this->getCurrentRegionId())
+                {
+                    $currRegionName = $regionName;
+                    $html .= '<option selected="selected" style="' . $css . '" value="'. $this->getNewUrl($urlKey) .'">'. $regionName .'</option>';
+                }
+                else
+                {
+                    $html .= '<option style="' . $css . '" value="'. $this->getNewUrl($urlKey) .'">'. $regionName .'</option>';
+                }
+                $total++;
+            }
+    ?>
+
+        <div class="region-switcher-container">
+            <div class="form-region">
+                <label for="select-region"><?php echo $this->__('Your City:'); ?></label>
+                <select onchange="window.location.href=this.value" title="<?php echo $this->__('Your City'); ?>" id="select-region">
+                    <?php echo $html; ?>
+                </select>
+            </div>
+        </div>
+
+<?php endif; ?>

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <default>
+        <reference name="header">
+            <block type="mageinn_regions/switch" name="region_switch" as="region_switch" template="mageinn/regions/switch/regions.phtml"/>
+        </reference>
+    </default>
+</layout>

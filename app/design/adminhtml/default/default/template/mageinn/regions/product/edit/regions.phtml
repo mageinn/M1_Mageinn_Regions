@@ -1,0 +1,101 @@
+<?php
+/**
+ * Mageinn_Regions extension
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * @category    Mageinn
+ * @package     Mageinn_Regions
+ * @copyright   Copyright (c) 2014 Mageinn. (http://mageinn.com)
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+
+/**
+ * @category   Mageinn
+ * @package    Mageinn_Regions
+ * @author     Mageinn
+ */
+?>
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head head-edit-form fieldset-legend"><?php echo Mage::helper('mageinn_regions')->__('Product Regions') ?></h4>
+    </div>
+    <fieldset id="grop_fields">
+        <input type="hidden" name="product[region_ids]" id="product-regions" value="<?php echo $this->getIdsString() ?>">
+        <div id="tree-div" class="tree"></div>
+    </fieldset>
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var loadOnNextSelect = false;
+var form_key = "<?php echo $this->getFormKey(); ?>"; 
+var new_node = 0;
+jQuery(function($){
+    $("#tree-div").jstree({ 
+        "plugins" : [ 
+            "themes","json_data","ui","checkbox","hotkeys" 
+        ],
+        "themes" : {
+            "theme" : "magento"
+        },
+        "checkbox" : {
+            "two_state" : true,
+            "override_ui" : true
+            //"real_checkboxes" : true
+        },
+        "json_data" : { 
+            "ajax" : {
+                "url" : "<?php echo $this->getLoadTreeUrl() ?>",
+                "data" : function (n) { 
+                    return { 
+                        "id" : "<?php echo $this->getProduct()->getId(); ?>",
+                        "region" : n.attr ? n.attr("id").replace("node_","") : 0,
+                        "form_key" : "<?php echo $this->getFormKey(); ?>"
+                    }; 
+                },
+                "type" : "POST"
+            }
+        },
+        "core" : { 
+            'animation' : false,
+            'initially_open' : [ <?php echo $this->getRootRegionId() ?> ] 
+        }
+    })
+    .bind("check_node.jstree", function (e, data) {
+            var id = data.rslt.obj.attr("id");
+            regionAdd(id);
+    })
+    .bind("uncheck_node.jstree", function (e, data) {
+            var id = data.rslt.obj.attr("id");
+            regionRemove(id);
+    });
+
+});
+
+function regionAdd(id) {
+    var ids = $('product-regions').value.split(',');
+    ids.push(id);
+    $('product-regions').value = ids.join(',');
+    varienElementMethods.setHasChanges($('product-regions'));
+}
+
+function regionRemove(id) {
+    var ids = $('product-regions').value.split(',');
+    while (-1 != ids.indexOf(id)) {
+        ids.splice(ids.indexOf(id), 1);
+    }
+    $('product-regions').value = ids.join(',');
+    varienElementMethods.setHasChanges($('product-regions'));
+}
+//]]>
+</script>

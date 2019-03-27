@@ -1,0 +1,186 @@
+<?php
+/**
+ * Mageinn_Regions extension
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * @category    Mageinn
+ * @package     Mageinn_Regions
+ * @copyright   Copyright (c) 2014 Mageinn. (http://mageinn.com)
+ * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+
+/**
+ * @category   Mageinn
+ * @package    Mageinn_Regions
+ * @author     Mageinn
+ */
+?>
+<div class="content-header">
+        <h3 class="icon-head head-categories" id="head-region"><?php echo $this->htmlEscape($this->getHeader()) . ($this->getRegionId() ? ' (' . Mage::helper('mageinn_regions')->__('ID: %s', $this->getRegionId()) . ')' : '') ?></h3>
+        <p class="content-buttons form-buttons">
+            <?php echo $this->getResetButtonHtml() ?>
+            <?php if($this->getRegionId()): ?>
+                    <?php echo $this->getDeleteButtonHtml() ?>
+            <?php endif; ?>
+            <?php echo $this->getSaveButtonHtml() ?>
+        </p>
+</div>
+<form id="region_edit_form" action="<?php echo $this->getSaveUrl() ?>" method="post" enctype="multipart/form-data">
+    <div class="no-display">
+        <input id="form_key" name="form_key" type="hidden" value="<?php echo $this->getFormKey() ?>" />
+    </div>
+    <?php echo $this->getChildHtml('form') ?>
+</form>
+
+<script type="text/javascript">
+//<![CDATA[
+jQuery(function($){
+    $("#region_edit_form").submit(function(){
+        regionSubmit();
+        return false;
+    });
+});
+
+function regionSubmit() {
+    var form = new Validation('region_edit_form', {useTitles:true});
+    if(!form.validate()){
+        return;
+    }
+    
+    displayLoadingMask();
+    
+    jQuery.ajax({
+        type: 'POST',
+        url: "<?php echo $this->getSaveUrl() ?>",
+        data : jQuery("#region_edit_form").serialize(),
+        dataType  : 'json',
+        success : function (data) {
+            updateContent(data);
+            jQuery('#loading-mask').hide();
+        }
+    });
+}
+
+/**
+* Update region content area
+*/
+function updateContent(data) {
+    jQuery("#head-region").html(data.region.title);
+    jQuery("#parent").val(data.region.parent_id);
+    jQuery("#id").val(data.region.entity_id);
+    jQuery("#name").val(data.region.name);
+    jQuery("#url_key").val(data.region.url_key);
+    jQuery("#is_active").val(data.region.is_active);
+    jQuery("#rtype").val(data.region.rtype);
+    jQuery("#form_key").val(data.form_key);
+    jQuery("p.content-buttons.form-buttons").html(data.buttons);
+    jQuery("#messages").html(data.messages);
+    
+    form_key = data.form_key;
+    
+    if(data.refreshTree) {
+        new_node = data.region.entity_id;
+        if(new_node == 0) {
+            // Node was removed
+            loadOnNextSelect = true;
+        } else {
+            loadOnNextSelect = false;
+        }
+        jQuery("#tree-div").jstree("refresh", "#" + data.region.parent_id);
+    }
+}
+
+/**
+* Add new region
+*/
+function addNew(group)
+{
+    displayLoadingMask();
+
+    jQuery.ajax({
+        type: 'POST',
+        url: "<?php echo $this->getAddUrl() ?>",
+        data : {
+            "parent" : jQuery("#tree-div").jstree('get_selected').attr('id'),
+            "group"  : group,
+            "form_key" : form_key
+        },
+        dataType  : 'json',
+        success : function (data) {
+            updateContent(data);
+            jQuery('#loading-mask').hide();
+        }
+    });
+}
+
+/**
+* Reset region form
+*/
+function regionReset(id)
+{
+    displayLoadingMask();
+    
+    editUrl = "<?php echo $this->getEditUrl() ?>";
+    addUrl = "<?php echo $this->getAddUrl() ?>";
+    
+    if(id > 0) {
+        url = editUrl;
+    } else {
+        url = addUrl;
+    }
+    
+    jQuery.ajax({
+        type: 'POST',
+        url: url,
+        data : {
+            "parent" : jQuery("#parent").val(),
+            "id" : jQuery("#id").val(),
+            "form_key" : form_key,
+            "group" : false
+        },
+        dataType  : 'json',
+        success : function (data) {
+            updateContent(data);
+            jQuery('#loading-mask').hide();
+        }
+    });
+    
+}
+
+/**
+* Delete some region
+* This routine get regionId explicitly, so even if currently selected tree node is out of sync
+* with this form, we surely delete same region in the tree and at backend
+*/
+function regionDelete(regionId) {
+    if (confirm('<?php echo $this->__('Are you sure you want to delete this region?');?>')){
+        displayLoadingMask();
+        
+        jQuery.ajax({
+            type: 'POST',
+            url: "<?php echo $this->getUrl('*/*/delete'); ?>",
+            data : {
+                "id" : regionId,
+                "form_key" : form_key
+            },
+            dataType  : 'json',
+            success : function (data) {
+                updateContent(data);
+                jQuery('#loading-mask').hide();
+            }
+        });
+    }
+}
+
+//]]>
+</script>

@@ -1,0 +1,214 @@
+<?xml version="1.0"?>
+<!--
+/**
+* Mageinn_Regions extension
+*
+* NOTICE OF LICENSE
+*
+* This source file is subject to the Open Software License (OSL 3.0)
+* that is bundled with this package in the file LICENSE.txt.
+* It is also available through the world-wide-web at this URL:
+* http://opensource.org/licenses/osl-3.0.php
+* If you did not receive a copy of the license and are unable to
+* obtain it through the world-wide-web, please send an email
+* to license@magentocommerce.com so we can send you a copy immediately.
+*
+* @category    Mageinn
+* @package     Mageinn_Regions
+* @copyright   Copyright (c) 2016 Mageinn. (http://mageinn.com/)
+* @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+*/
+
+
+/**
+* @category   Mageinn
+* @package    Mageinn_Regions
+* @author     Mageinn
+*/
+-->
+<config>
+    <modules>
+        <Mageinn_Regions>
+            <version>1.0.0</version>
+        </Mageinn_Regions>
+    </modules>
+    
+    <global>
+        <blocks>
+            <mageinn_regions>
+                <class>Mageinn_Regions_Block</class>
+            </mageinn_regions>
+            <catalog>
+                <rewrite>
+                    <navigation>Mageinn_Regions_Block_Catalog_Navigation</navigation>
+                </rewrite>
+            </catalog>
+            <page>
+                <rewrite>
+                    <html_footer>Mageinn_Regions_Block_Page_Html_Footer</html_footer>
+                </rewrite>
+            </page>
+        </blocks>
+        <helpers>
+            <mageinn_regions>
+                <class>Mageinn_Regions_Helper</class>
+            </mageinn_regions>
+        </helpers>
+        <models>
+            <mageinn_regions>
+                <class>Mageinn_Regions_Model</class>
+                <resourceModel>mageinn_regions_resource</resourceModel>
+            </mageinn_regions>
+            <mageinn_regions_resource>
+                <class>Mageinn_Regions_Model_Resource</class>
+                <entities>
+                    <region>
+                        <table>mageinn_region_entity</table>
+                    </region>
+                    <region_product>
+                        <table>mageinn_region_product</table>
+                    </region_product>
+                </entities>
+            </mageinn_regions_resource>
+            <core>
+                <rewrite>
+                    <store>Mageinn_Regions_Model_Core_Store</store>
+                </rewrite>
+            </core>
+        </models>
+        <resources>
+            <mageinn_regions_setup>
+                <setup>
+                    <module>Mageinn_Regions</module>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </mageinn_regions_setup>
+        </resources>
+        <events>
+            <controller_front_init_before>
+                <observers>
+                    <mageinn_regions_parse_region>
+                        <type>singleton</type>
+                        <class>mageinn_regions/observer</class>
+                        <method>addRouter</method>
+                    </mageinn_regions_parse_region>
+                </observers>
+            </controller_front_init_before>	
+            <catalog_product_collection_load_before>
+                <observers>
+                    <mageinn_regions_filter_products>
+                        <type>singleton</type>
+                        <class>mageinn_regions/observer</class>
+                        <method>filterByRegion</method>
+                    </mageinn_regions_filter_products>
+                </observers>
+            </catalog_product_collection_load_before>
+        </events>
+    </global>
+       
+    <frontend>
+        <layout>
+            <updates>
+                <mageinn_regions ifconfig="mageinn_regions/general/enabled">
+                    <file>mageinn/regions.xml</file>
+                </mageinn_regions>
+            </updates>
+        </layout>
+        <translate>
+            <modules>
+                <Mageinn_Regions>
+                    <files>
+                        <default>Mageinn_Regions_Frontend.csv</default>
+                    </files>
+                </Mageinn_Regions>
+            </modules>
+        </translate>
+    </frontend>
+    
+    <adminhtml>
+        <menu>
+            <catalog translate="title" module="catalog">
+                <children>
+                    <regions translate="title" module="mageinn_regions">
+                        <title>Manage Regions</title>
+                        <action>regions/adminhtml_index</action>
+                        <sort_order>10</sort_order>
+                        <depends><config>mageinn_regions/general/enabled</config></depends>
+                    </regions>
+                </children>
+            </catalog>
+        </menu>
+        <acl>
+            <resources>
+                <admin>
+                    <children>
+                        <system>
+                            <children>
+                                <config>
+                                    <children>
+                                        <mageinn_core translate="title">
+                                            <title>Mageinn - General</title>
+                                        </mageinn_core>
+                                        <mageinn_regions translate="title">
+                                            <title>Mageinn Regions</title>
+                                        </mageinn_regions>
+                                    </children>
+                                </config>      
+                            </children>
+                        </system>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
+        <translate>
+            <modules>
+                <Mageinn_Regions>
+                    <files>
+                        <default>Mageinn_Regions_Admin.csv</default>
+                    </files>
+                </Mageinn_Regions>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <mageinn_regions ifconfig="mageinn_regions/general/enabled">
+                    <file>mageinn/regions.xml</file>
+                </mageinn_regions>
+            </updates>
+        </layout>
+        <events>
+            <core_block_abstract_prepare_layout_after>
+                <observers>
+                    <mageinn_regions_add_tab>
+                        <type>singleton</type>
+                        <class>mageinn_regions/observer</class>
+                        <method>addExtraTab</method>
+                    </mageinn_regions_add_tab>
+                </observers>
+            </core_block_abstract_prepare_layout_after>
+            <catalog_product_save_after>
+                <observers>
+                    <mageinn_regions_save_regions>
+                        <type>singleton</type>
+                        <class>mageinn_regions/observer</class>
+                        <method>saveRegions</method>
+                    </mageinn_regions_save_regions>
+                </observers>
+            </catalog_product_save_after> 
+        </events>
+    </adminhtml>
+    
+    <admin>
+        <routers>
+            <mageinn_regions>
+                <use>admin</use>
+                <args>
+                    <module>Mageinn_Regions</module>
+                    <frontName>regions</frontName>
+                </args>
+            </mageinn_regions>
+        </routers>
+    </admin>
+</config>

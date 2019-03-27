@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<layout>
+    <default>
+        <reference name="head">
+            <!-- jQuery -->
+            <action ifconfig="mageinn_core/jquery/jquery_admin" method="addJs"><script>mageinn/jquery/jquery.min.js</script></action>
+            <action ifconfig="mageinn_core/jquery/jquery_admin" method="addJs"><script>mageinn/jquery/jquery.noconflict.js</script></action>
+        </reference>    
+    </default>
+    <mageinn_regions_adminhtml_index_index>
+        <reference name="head">
+            <action method="addJs"><script>mageinn/jquery/jstree/jquery.jstree.js</script></action>
+            <action method="addJs"><script>mageinn/jquery/jstree/jquery.hotkeys.js</script></action>
+            <action method="addJs"><script>mageinn/jquery/jstree/jquery.cookie.js</script></action>
+        </reference>
+        <reference name="left">
+            <block name="regions.tree" type="mageinn_regions/adminhtml_tree" template="mageinn/regions/tree.phtml" />
+        </reference>
+        <reference name="content">
+            <block name="regions.edit" type="mageinn_regions/adminhtml_edit" template="mageinn/regions/edit.phtml" />
+        </reference>
+    </mageinn_regions_adminhtml_index_index>
+    
+    <adminhtml_catalog_product_edit>
+        <reference name="head">
+            <action ifconfig="mageinn_regions/general/enabled" method="addJs"><script>mageinn/jquery/jstree/jquery.jstree.js</script></action>
+            <action ifconfig="mageinn_regions/general/enabled" method="addJs"><script>mageinn/jquery/jstree/jquery.hotkeys.js</script></action>
+            <action ifconfig="mageinn_regions/general/enabled" method="addJs"><script>mageinn/jquery/jstree/jquery.cookie.js</script></action>
+        </reference>
+    </adminhtml_catalog_product_edit>
+    
+    <adminhtml_catalog_product_new>
+        <reference name="head">
+            <action ifconfig="mageinn_regions/general/enabled" method="addJs"><script>mageinn/jquery/jstree/jquery.jstree.js</script></action>
+            <action ifconfig="mageinn_regions/general/enabled" method="addJs"><script>mageinn/jquery/jstree/jquery.hotkeys.js</script></action>
+            <action ifconfig="mageinn_regions/general/enabled" method="addJs"><script>mageinn/jquery/jstree/jquery.cookie.js</script></action>
+        </reference>
+    </adminhtml_catalog_product_new>
+    
+    <mageinn_regions_adminhtml_product_index>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="mageinn_regions/adminhtml_product_edit_tab_regions" name="catalog.product.edit.tab.regions"/>
+        </block>
+    </mageinn_regions_adminhtml_product_index>
+</layout>
